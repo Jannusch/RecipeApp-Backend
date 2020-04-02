@@ -95,10 +95,37 @@ func insertIngrediant(ingredient Ingredient) bool {
 	return true
 }
 
-func getAllRecipebooks() bool {
-	sel := "SELECT name FROM recipes"
-	fmt.Print(sel)
-	return false
+func getAllRecipebooks() (Recipebooks, bool) {
+	sel := "SELECT * FROM recipebooks;"
+	if dbCredentials.DBname == "" {
+		readDBCredentials()
+	}
+
+	db, err := sql.Open("postgres", "dbname="+dbCredentials.DBname+" user="+dbCredentials.DBuser+" password="+dbCredentials.DBpassword+" sslmode=disable")
+	if err != nil {
+		fmt.Print("Now I'm there")
+		fmt.Print(err)
+		log.Fatal(err)
+		return Recipebooks{}, false
+	}
+
+	rows, err := db.Query(sel)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var recipebooks Recipebooks
+
+	for rows.Next() {
+		var recipebook Recipebook
+		if err := rows.Scan(&recipebook.UUID, &recipebook.Name, &recipebook.Author); err != nil {
+			log.Fatal(err)
+		}
+		recipebooks = append(recipebooks, recipebook)
+	}
+	fmt.Print(recipebooks)
+	return recipebooks, true
 }
 
 // DBcredentials contains the crendetials for the database that stores the recipe values

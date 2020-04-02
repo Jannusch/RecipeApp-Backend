@@ -23,9 +23,9 @@ type Recipes []Recipe
 
 // Recipebook define the basic structure of a Recipebook
 type Recipebook struct {
-	Name   string    `json:"name"`
-	UUID   uuid.UUID `json:"uuid"`
-	Author string    `json:"author"`
+	Name   string `json:"name"`
+	UUID   string `json:"uuid"` // uuid.UUID `json:"uuid"`
+	Author string `json:"author"`
 }
 
 // Recipebooks is a list of Recipebooks

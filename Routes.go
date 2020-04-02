@@ -31,7 +31,7 @@ var routers = Routes{
 	{
 		"RecipebookDetails",
 		"GET",
-		"/recipebook/{id}",
+		"/recipebooks/{id}",
 		RecipebookDetails,
 	},
 	{
@@ -39,5 +39,11 @@ var routers = Routes{
 		"POST",
 		"/recipe",
 		RecipeAdd,
+	},
+	{
+		"Index",
+		"GET",
+		"/",
+		Index,
 	},
 }
