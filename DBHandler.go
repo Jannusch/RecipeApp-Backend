@@ -29,12 +29,12 @@ func readDBCredentials() {
 }
 
 func convertRecipe(recipestring RecipeString) Recipe {
+	// layout := "2006-01-02"
 
 	var recipe Recipe
 	recipe.ID, _ = uuid.Parse(recipestring.ID)
 	recipe.Name = recipestring.Name
 	recipe.Date = time.Now()
-	recipe.Text = recipestring.Text
 	recipe.Difficulty = recipestring.Difficulty
 	recipe.Time, _ = strconv.Atoi(recipestring.Time)
 	recipe.Rating = recipestring.Rating
@@ -146,7 +146,9 @@ func insertRecipe(recipeString RecipeString) (bool, uuid.UUID) {
 		// return false, uuid.New()
 	}
 
-	ins := "INSERT INTO recipes (id, name, date, difficulty, time, text, rating, recipebook-id) VALUES ($1, $2, $3, $4, $5, $6, $7);"
+	fmt.Print(recipe)
+
+	ins := "INSERT INTO recipes (id, name, date, difficulty, time, text, rating, \"recipebook-id\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
 	_, err = db.Exec(ins, recipe.ID, recipe.Name, recipe.Date, recipe.Difficulty, recipe.Time, recipe.Text, recipe.Rating, recipe.RecipebookID)
 
 	if err != nil {
