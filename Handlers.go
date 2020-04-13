@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -61,9 +63,8 @@ func RecipebookDetails(w http.ResponseWriter, r *http.Request) {
 
 // RecipeAdd handle a new incomming recipe
 func RecipeAdd(w http.ResponseWriter, r *http.Request) {
-	/* var f RecipeWithIngrediants
+	var f RecipeWithIngrediants
 	body, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-
 	if err := json.Unmarshal(body, &f); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422)
@@ -72,19 +73,24 @@ func RecipeAdd(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var recipe Recipe = f.Recipe
-	var ingredients Ingredients = f.Ingrediants
+	var recipe RecipeString = f.Recipe
+	succesInsertRecipe, recipeID := insertRecipe(recipe)
+	var succesInsertIngredients bool
 
-	succesInsertRecipe := insertRecipe(recipe)
-
-	succesInsertIngrediants := insertIngrediants(ingredients)
-
-	if succesInsertIngrediants && succesInsertRecipe {
-		w.WriteHeader(200)
+	if succesInsertRecipe {
+		var ingredientsString IngredientsString = f.Ingrediants
+		succesInsertIngredients = insertIngredients(ingredientsString, recipeID)
+	} else {
+		w.WriteHeader(422)
+		succesInsertIngredients = false
 	}
-	w.WriteHeader(422) */
-	fmt.Print("Now I'm here")
-	w.WriteHeader(200)
+
+	if succesInsertIngredients {
+		w.WriteHeader(200)
+	} else {
+		w.WriteHeader(422)
+	}
+
 }
 
 // Index is the Indexpage \(°^°)/
