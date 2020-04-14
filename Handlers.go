@@ -69,6 +69,9 @@ func RecipeAdd(w http.ResponseWriter, r *http.Request) {
 	var f RecipeWithIngrediants
 	body, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err := json.Unmarshal(body, &f); err != nil {
+		fmt.Print("Test\n\n\n\n\n")
+		fmt.Print(err)
+		fmt.Print("\n\n\n\n")
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422)
 		if err := json.NewEncoder(w).Encode(err); err != nil {

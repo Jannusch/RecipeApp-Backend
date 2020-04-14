@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,7 +36,7 @@ func convertRecipe(recipestring RecipeString) Recipe {
 	recipe.Name = recipestring.Name
 	recipe.Date = time.Now()
 	recipe.Difficulty = recipestring.Difficulty
-	recipe.Time, _ = strconv.Atoi(recipestring.Time)
+	recipe.Time = recipestring.Time
 	recipe.Rating = recipestring.Rating
 	recipe.RecipebookID, _ = uuid.Parse(recipestring.RecipebookID)
 	return recipe

@@ -22,9 +22,9 @@ type Recipe struct {
 type RecipeString struct {
 	Name         string `json:"name"`
 	ID           string `json:"uuid"`
-	Date         string `json:"date"`
+	Date         int    `json:"date"`
 	Difficulty   int    `json:"difficulty"`
-	Time         string `json:"time"`
+	Time         int    `json:"time"`
 	Text         string `json:"text"`
 	Rating       int    `json:"rating"`
 	RecipebookID string `json:"recipebookID"`
