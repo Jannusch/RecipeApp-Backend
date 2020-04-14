@@ -150,7 +150,7 @@ func getRecipebookDetails(uuidString string) (Recipebook, error) {
 
 	for rows.Next() {
 		var recipebook Recipebook
-		if err := rows.Scan(&recipebook.Name, &recipebook.UUID, &recipebook.Author); err != nil {
+		if err := rows.Scan(&recipebook.UUID, &recipebook.Name, &recipebook.Author); err != nil {
 			log.Fatal(err)
 		}
 		recipebooks = append(recipebooks, recipebook)

@@ -19,7 +19,6 @@ func AllRecipeBooks(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(302)
 		return
 	}
-
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(recipebooks)
 
@@ -62,7 +61,6 @@ func RecipebookDetails(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		fmt.Print(w, "I'm Sorry but the requested uuid is not valid")
 	}
-
 	json.NewEncoder(w).Encode(recipebook)
 }
 
