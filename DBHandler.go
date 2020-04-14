@@ -121,6 +121,46 @@ func getRecipe(uuid uuid.UUID) (Recipe, error) {
 	return recipes[0], nil
 }
 
+func getRecipebookDetails(uuidString string) (Recipebook, error) {
+	uuid, err := uuid.Parse(uuidString)
+
+	if err != nil {
+		return Recipebook{}, errors.New("Unabel to parse uuid")
+	}
+	sel := "SELECT * FROM recipebooks WHERE id=$1"
+	if dbCredentials.DBname == "" {
+		readDBCredentials()
+	}
+
+	db, err := sql.Open("postgres", "dbname="+dbCredentials.DBname+" user="+dbCredentials.DBuser+" password="+dbCredentials.DBpassword+" sslmode=disable")
+	if err != nil {
+		fmt.Print("Now I'm there")
+		fmt.Print(err)
+		log.Fatal(err)
+		return Recipebook{}, errors.New("unabel to open DB")
+	}
+
+	rows, err := db.Query(sel, uuid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var recipebooks Recipebooks
+
+	for rows.Next() {
+		var recipebook Recipebook
+		if err := rows.Scan(&recipebook.Name, &recipebook.UUID, &recipebook.Author); err != nil {
+			log.Fatal(err)
+		}
+		recipebooks = append(recipebooks, recipebook)
+	}
+	if len(recipebooks) != 1 {
+		return Recipebook{}, errors.New("To many recibooks for given uuid")
+	}
+	return recipebooks[0], nil
+}
+
 func getAllRecipebooks() (Recipebooks, error) {
 	sel := "SELECT * FROM recipebooks;"
 	if dbCredentials.DBname == "" {
