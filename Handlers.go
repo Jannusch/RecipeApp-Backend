@@ -7,9 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-
 	"github.com/gorilla/mux"
-	
 )
 
 // AllRecipeBooks return all Recipebooks that stored in the database
@@ -58,13 +56,13 @@ func RecipebookDetails(w http.ResponseWriter, r *http.Request) {
 	uuid := vars["id"]
 	fmt.Print(uuid)
 
-	recipebook, err := getRecipebookDetails(uuid.Parse(uuid))
-
-	var recipebook = Recipebook{
-		"Wokgemuche",
-		"24ba3f2e-dd11-4153-8318-fgrg3456346ef",
-		"Anton Antonson",
+	recipebook, err := getRecipebookDetails(uuid)
+	if err != nil {
+		fmt.Print(err)
+		w.WriteHeader(400)
+		fmt.Print(w, "I'm Sorry but the requested uuid is not valid")
 	}
+
 	json.NewEncoder(w).Encode(recipebook)
 }
 
