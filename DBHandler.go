@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -52,15 +53,15 @@ func convertIngredient(ingredientString IngredientString, recipeID uuid.UUID) In
 	return ingredient
 }
 
-func insertIngredients(ingrediants IngredientsString, recipeID uuid.UUID) bool {
+func insertIngredients(ingrediants IngredientsString, recipeID uuid.UUID) error {
 	for _, ingredientStrings := range ingrediants {
 		var ingredient = convertIngredient(ingredientStrings, recipeID)
 		succes := insertIngredient(ingredient)
 		if !succes {
-			return false
+			return errors.New("Unabel to insert Ingredient")
 		}
 	}
-	return true
+	return nil
 }
 
 func insertIngredient(ingredient Ingredient) bool {
@@ -87,7 +88,40 @@ func insertIngredient(ingredient Ingredient) bool {
 	return true
 }
 
-func getAllRecipebooks() (Recipebooks, bool) {
+func getRecipe(uuid uuid.UUID) (Recipe, error) {
+	sel := "SELECT * FROM recipes WHERE id=$1"
+	if dbCredentials.DBname == "" {
+		readDBCredentials()
+	}
+
+	db, err := sql.Open("postgres", "dbname="+dbCredentials.DBname+" user="+dbCredentials.DBuser+" password="+dbCredentials.DBpassword+" sslmode=disable")
+	if err != nil {
+		fmt.Print("Now I'm there")
+		fmt.Print(err)
+		log.Fatal(err)
+		return Recipe{}, errors.New("unabel to open DB")
+	}
+
+	rows, err := db.Query(sel)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var recipes Recipes
+
+	for rows.Next() {
+		var recipe Recipe
+		if err := rows.Scan(&recipe.Name, &recipe.ID, &recipe.Date, &recipe.Difficulty, &recipe.Time, &recipe.Text, &recipe.Rating, &recipe.RecipebookID); err != nil {
+			log.Fatal(err)
+		}
+		recipes = append(recipes, recipe)
+	}
+
+	return recipes[0], nil
+}
+
+func getAllRecipebooks() (Recipebooks, error) {
 	sel := "SELECT * FROM recipebooks;"
 	if dbCredentials.DBname == "" {
 		readDBCredentials()
@@ -98,7 +132,7 @@ func getAllRecipebooks() (Recipebooks, bool) {
 		fmt.Print("Now I'm there")
 		fmt.Print(err)
 		log.Fatal(err)
-		return Recipebooks{}, false
+		return Recipebooks{}, errors.New("Unabel to open DB")
 	}
 
 	rows, err := db.Query(sel)
@@ -117,10 +151,10 @@ func getAllRecipebooks() (Recipebooks, bool) {
 		recipebooks = append(recipebooks, recipebook)
 	}
 	fmt.Print(recipebooks)
-	return recipebooks, true
+	return recipebooks, nil
 }
 
-func insertRecipe(recipeString RecipeString) (bool, uuid.UUID) {
+func insertRecipe(recipeString RecipeString) (uuid.UUID, error) {
 	var recipe = convertRecipe(recipeString)
 	if dbCredentials.DBname == "" {
 		readDBCredentials()
@@ -142,22 +176,23 @@ func insertRecipe(recipeString RecipeString) (bool, uuid.UUID) {
 		fmt.Print(err)
 		log.Fatal(err)
 		// Only for testing
-		return false, recipe.ID
+		return recipe.ID, errors.New("Unabel to open DB")
 		// return false, uuid.New()
 	}
 
 	fmt.Print(recipe)
 
-	ins := "INSERT INTO recipes (id, name, date, difficulty, time, text, rating, \"recipebook-id\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
+	// I know the stupidity with the recipebook-id. If you know a nice solution -> pull request, please
+	ins := "INSERT INTO recipes (id, name, date, difficulty, time, text, rating, \"recipebook-id\") VALUES ($1, $2, $3, $4, $5, $6, $7, (SELECT id from recipebooks WHERE id=$8));"
 	_, err = db.Exec(ins, recipe.ID, recipe.Name, recipe.Date, recipe.Difficulty, recipe.Time, recipe.Text, recipe.Rating, recipe.RecipebookID)
 
 	if err != nil {
 		fmt.Print(err)
 		// Only for testing
-		return false, recipe.ID
+		return recipe.ID, errors.New("Unabel to insert recipe")
 		// return false, uuid.New()
 	}
-	return false, recipe.ID
+	return recipe.ID, nil
 }
 
 // DBcredentials contains the crendetials for the database that stores the recipe values

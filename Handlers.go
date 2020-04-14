@@ -74,22 +74,22 @@ func RecipeAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var recipe RecipeString = f.Recipe
-	succesInsertRecipe, recipeID := insertRecipe(recipe)
-	var succesInsertIngredients bool
-
-	if succesInsertRecipe {
-		var ingredientsString IngredientsString = f.Ingrediants
-		succesInsertIngredients = insertIngredients(ingredientsString, recipeID)
-	} else {
+	recipeID, err := insertRecipe(recipe)
+	if err != nil {
+		fmt.Print(err)
 		w.WriteHeader(422)
-		succesInsertIngredients = false
+		return
 	}
 
-	if succesInsertIngredients {
-		w.WriteHeader(200)
-	} else {
+	var ingredientsString IngredientsString = f.Ingrediants
+	err = insertIngredients(ingredientsString, recipeID)
+	if err != nil {
+		fmt.Print(err)
 		w.WriteHeader(422)
+		return
 	}
+
+	w.WriteHeader(200)
 
 }
 
