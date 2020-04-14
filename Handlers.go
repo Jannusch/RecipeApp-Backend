@@ -15,12 +15,14 @@ func AllRecipeBooks(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 
 	recipebooks, err := getAllRecipebooks()
-	if !err {
+	if err != nil {
 		w.WriteHeader(302)
-	} else {
-		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(recipebooks)
+		return
 	}
+
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(recipebooks)
+
 	/*var allRecipeBooksVariable = Recipebooks{
 		Recipebook{
 			"50 Soßen eine Nudel",
