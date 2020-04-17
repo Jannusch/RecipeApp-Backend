@@ -29,8 +29,7 @@ func readDBCredentials() {
 }
 
 func convertRecipe(recipestring RecipeString) Recipe {
-	// layout := "2006-01-02"
-
+	
 	var recipe Recipe
 	recipe.ID, _ = uuid.Parse(recipestring.ID)
 	recipe.Name = recipestring.Name
@@ -39,6 +38,7 @@ func convertRecipe(recipestring RecipeString) Recipe {
 	recipe.Time = recipestring.Time
 	recipe.Rating = recipestring.Rating
 	recipe.RecipebookID, _ = uuid.Parse(recipestring.RecipebookID)
+	recipe.Text = recipestring.Text
 	return recipe
 }
 
