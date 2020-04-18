@@ -70,5 +70,5 @@ type IngredientsString []IngredientString
 // RecipeWithIngrediants is the structure that the server will get from the Frontend
 type RecipeWithIngrediants struct {
 	Recipe      RecipeString       `json:"recipe"`
-	Ingrediants []IngredientString `json:"ingrediants"`
+	Ingrediants []IngredientString `json:"ingredients"`
 }

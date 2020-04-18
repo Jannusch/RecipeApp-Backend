@@ -47,13 +47,14 @@ func convertIngredient(ingredientString IngredientString, recipeID uuid.UUID) In
 	ingredient.Name = ingredientString.Name
 	ingredient.Quantity = ingredientString.Quantity
 	ingredient.Unit = ingredientString.Unit
-	ingredient.ID, _ = uuid.Parse(ingredientString.ID)
+	ingredient.ID = uuid.New()
 	ingredient.RecipeID = recipeID
 	return ingredient
 }
 
-func insertIngredients(ingrediants IngredientsString, recipeID uuid.UUID) error {
-	for _, ingredientStrings := range ingrediants {
+func insertIngredients(ingredients IngredientsString, recipeID uuid.UUID) error {
+	fmt.Print(ingredients)
+	for _, ingredientStrings := range ingredients {
 		var ingredient = convertIngredient(ingredientStrings, recipeID)
 		succes := insertIngredient(ingredient)
 		if !succes {
@@ -64,6 +65,7 @@ func insertIngredients(ingrediants IngredientsString, recipeID uuid.UUID) error 
 }
 
 func insertIngredient(ingredient Ingredient) bool {
+	fmt.Print(ingredient)
 	db, err := sql.Open("postgres", "dbname="+dbCredentials.DBname+" user="+dbCredentials.DBuser+" password="+dbCredentials.DBpassword+" sslmode=disable")
 	if err != nil {
 		fmt.Print("Now I'm there")
@@ -77,10 +79,11 @@ func insertIngredient(ingredient Ingredient) bool {
 		ingredient.ID = uuid.New()
 	}
 
-	ins := "INSERT INTO recipes (name, quantity, recipe-id, id, unit) VALUES ($1, $2, $3, $4, $5);"
+	ins := "INSERT INTO ingredients (\"name\", \"quantity\", \"recipe-id\", \"id\", \"unit\") VALUES ($1, $2, (SELECT id from recipes WHERE id=$3), $4, $5);"
 	_, err = db.Exec(ins, ingredient.Name, ingredient.Quantity, ingredient.RecipeID, ingredient.ID, ingredient.Unit)
 
 	if err != nil {
+		fmt.Print(err)
 		return false
 	}
 
@@ -232,6 +235,45 @@ func insertRecipe(recipeString RecipeString) (uuid.UUID, error) {
 		// return false, uuid.New()
 	}
 	return recipe.ID, nil
+}
+
+func getAllRecipes(uuidString string) (Recipes, error) {
+	uuid, err := uuid.Parse(uuidString)
+
+	if err != nil {
+		return Recipes{}, errors.New("Unagble to parse recipebook UUID")
+	}
+
+	db, err := sql.Open("postgres", "dbname="+dbCredentials.DBname+" user="+dbCredentials.DBuser+" password="+dbCredentials.DBpassword+" sslmode=disable")
+	if err != nil {
+		fmt.Print(err)
+		log.Fatal(err)
+		// Only for testing
+		return Recipes{}, errors.New("Unabel to open DB")
+		// return false, uuid.New()
+	}
+
+	sel := "SELECT * FROM recipes WHERE \"recipebook-id\"=$1"
+
+	rows, err := db.Query(sel, uuid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var recipes Recipes
+
+	for rows.Next() {
+		var recipe Recipe
+		if err := rows.Scan(&recipe.ID, &recipe.Name, &recipe.Date, &recipe.Difficulty, &recipe.Time, &recipe.Text, &recipe.Rating, &recipe.RecipebookID); err != nil {
+			log.Fatal(err)
+		}
+		recipes = append(recipes, recipe)
+	}
+	fmt.Print(recipes)
+	return recipes, nil
+
+
 }
 
 // DBcredentials contains the crendetials for the database that stores the recipe values

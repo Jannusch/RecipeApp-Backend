@@ -46,14 +46,26 @@ func AllRecipeBooks(w http.ResponseWriter, r *http.Request) {
 // AllSpecificRecipes return all recipes to one given recipebook
 func AllSpecificRecipes(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fmt.Print(vars["id"])
+	uuid := vars["id"]
+
+	recipes, err := getAllRecipes(uuid)
+
+	if err != nil{
+		fmt.Print(err)
+		w.WriteHeader(422)
+		return
+	}
+
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(recipes)
+
 }
 
 // RecipebookDetails returns a json with details to a given recipebook
 func RecipebookDetails(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uuid := vars["id"]
-	fmt.Print(uuid)
+	// fmt.Print(uuid)
 
 	recipebook, err := getRecipebookDetails(uuid)
 	if err != nil {
